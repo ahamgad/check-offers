@@ -161,7 +161,7 @@
         dot.style.setProperty('--dy', `${Math.sin(angle)*dist}px`);
         dot.style.left = `${x}px`;
         dot.style.top = `${y}px`;
-        dot.style.backgroundColor = `hsl(${Math.random()*360},100%,100%)`;
+        dot.style.backgroundColor = `hsl(${Math.random()*360},100%,50%)`;
         parent.append(dot);
         setTimeout(() => dot.remove(), 3000);
       }
