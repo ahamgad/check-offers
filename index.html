@@ -71,7 +71,7 @@
       text-align: center;
     }
     .status {
-      margin-top: 4px;
+      margin-top: 8px; /* مسافة بسيطة عن الوصف */
       font-size: 14px;
       font-weight: 700;
       color: #444;
@@ -141,14 +141,9 @@
       text-align: center;
       color: #D12C2C;
       font-size: 14px;
-      font-weight: 600;
+      font-weight: 800;
       display: none;
       margin-bottom: 16px;
-    }
-    #error-msg i {
-      font-weight: 900;
-      font-size: 16px;
-      margin-top: 2px;
     }
   </style>
 </head>
@@ -167,11 +162,16 @@
       </div>
     </div>
   </div>
-  
+
   <script>
     const delay = 15;
     const finalDelay = 15;
-    const hutLat = 30.10683090182237, hutLng = 31.32688947577044;
+
+    // ======= تم تعديل الإحداثيات هنا =======
+    const hutLat = 30.10683090182237;
+    const hutLng = 31.32688947577044;
+    // =====================================
+
     const hutRadius = 0.15; // حوالي 150 متر
     let step = +localStorage.stepIndex || 0;
     let start = +localStorage.stepStart || Date.now();
@@ -207,19 +207,17 @@
       container.append(bar);
     };
 
-    // دالة تحقق من موقع المستخدم مع إعدادات timeout قليلة
+    // دالة تحقق من موقع المستخدم مع timeout 3 ثواني وخيارات سريعة
     function checkProximity(callback) {
       if (!navigator.geolocation) {
         return callback('no-geo-support');
       }
 
-      // نتحقق أولاً من حالة الصلاحية
       navigator.permissions.query({ name: 'geolocation' })
         .then(permissionStatus => {
           if (permissionStatus.state === 'denied') {
             return callback('permission-denied');
           }
-          // إذا مرفوض سابقًا، نوقف هنا. إذا حالته prompt أو granted، نستدعي getCurrentPosition
           navigator.geolocation.getCurrentPosition(
             pos => {
               const { latitude, longitude } = pos.coords;
@@ -235,18 +233,17 @@
               if (err.code === err.PERMISSION_DENIED) {
                 return callback('permission-denied');
               }
-              // TIMEOUT أو POSITION_UNAVAILABLE
               return callback('location-error');
             },
             {
               enableHighAccuracy: false,
-              timeout: 3000,   // مهلة 3 ثواني
+              timeout: 3000,  // مهلة 3 ثوانٍ
               maximumAge: 0
             }
           );
         })
         .catch(() => {
-          // إذا فشل Permissions API (نادراً ما يحصل)، نطلب الموقع مباشرة
+          // إذا أخفق Permissions API، نطلب الموقع مباشرة
           navigator.geolocation.getCurrentPosition(
             pos => {
               const { latitude, longitude } = pos.coords;
@@ -279,7 +276,7 @@
       root.innerHTML = '';
       const errMsg = document.getElementById('error-msg');
       errMsg.style.display = 'none';
-      errMsg.innerHTML = ''; // نتأكد أن المحتوى فارغ عند كل إعادة رسم
+      errMsg.innerHTML = ''; // نظّف المحتوى عند كل إعادة عرض
 
       if (step > 3) return reset();
 
@@ -291,7 +288,7 @@
       content.className = 'card-content' + (step === 3 ? ' final' : '');
 
       if (step === 3) {
-        // شاشة العرض النهائي
+        // شاشة الخطوة النهائية
         const h1 = document.createElement('h3');
         h1.textContent = 'Your Offer Is Ready';
         content.append(h1);
@@ -346,12 +343,8 @@
       }
       content.append(desc);
 
+      // ======= هنا نضع الكاونتر تحت الوصف مباشرة =======
       let statusDiv;
-      const btn = document.createElement('button');
-      btn.textContent = (step === 0 || step === 1) ? 'Next Mission' : 'Claim Now';
-      btn.disabled = (step > 0 && elapsed < delay);
-      content.append(btn);
-
       if (step > 0 && elapsed < delay) {
         statusDiv = document.createElement('div');
         statusDiv.className = 'status';
@@ -369,15 +362,23 @@
           }
         }, 1000);
       }
+      // =================================================
+
+      const btn = document.createElement('button');
+      btn.textContent = (step === 0 || step === 1) ? 'Next Mission' : 'Claim Now';
+      btn.disabled = (step > 0 && elapsed < delay);
+      content.append(btn);
 
       btn.addEventListener('click', () => {
+        // إذا رسالة الخطأ ظاهرة مسبقًا، لا نعيد الفحص
         if (window.getComputedStyle(errMsg).display === 'block') {
-          return; // إذا الرسالة بالفعل ظاهرة، لا نعيد الفحص
+          return;
         }
 
         checkProximity(status => {
           if (status === 'far') {
-            errMsg.innerHTML = '<i class="fi fi-rr-exclamation"></i> You must be at Coffee Hut to proceed';
+            // لا نعرض أيقونات هنا بناءً على طلبك
+            errMsg.textContent = 'You must be at Coffee Hut to proceed';
             errMsg.style.display = 'block';
           }
           else if (status === 'inside') {
@@ -389,11 +390,12 @@
             render();
           }
           else if (status === 'permission-denied') {
-            errMsg.innerHTML = '<i class="fi fi-tr-access-denied"></i> Please enable location access to continue';
+            errMsg.textContent = 'Please enable location access to continue';
             errMsg.style.display = 'block';
           }
           else if (status === 'no-geo-support' || status === 'location-error') {
-            errMsg.innerHTML = '<i class="fi fi-tr-octagon-xmark"></i> Unable to determine your location';
+            // إضافة السطر الإضافي مع <br>
+            errMsg.innerHTML = 'Unable to determine your location<br>Reload page & try again';
             errMsg.style.display = 'block';
           }
         });
@@ -404,7 +406,7 @@
       requestAnimationFrame(() => card.classList.add('show'));
     }
 
-    // إذا لم تكن هناك قيم محفوظة، ننشئها
+    // إذا لم توجد القيم مخزّنة، ننشئها
     if (!localStorage.stepStart) save();
     render();
   </script>
