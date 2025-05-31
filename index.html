@@ -143,6 +143,7 @@
       font-size: 14px;
       font-weight: 800;
       display: none;
+      margin-bottom: 16px;
     }
   </style>
 </head>
@@ -159,24 +160,41 @@
     const delay = 15;
     const finalDelay = 15;
     const hutLat = 30.054164, hutLng = 31.201395;
-    const hutRadius = 0.15;
+    const hutRadius = 0.15; // بالكيلومترات
     let step = +localStorage.stepIndex || 0;
     let start = +localStorage.stepStart || Date.now();
-    const save = () => { localStorage.stepIndex = step; localStorage.stepStart = start; };
+
+    const save = () => {
+      localStorage.stepIndex = step;
+      localStorage.stepStart = start;
+    };
+
     const clearAll = () => {
       clearInterval(window.timer);
       clearInterval(window.finalTimer);
     };
-    const reset = () => { clearAll(); step = 0; start = Date.now(); save(); render(); };
+
+    const reset = () => {
+      clearAll();
+      step = 0;
+      start = Date.now();
+      save();
+      render();
+    };
+
     const formatTime = (s) => {
       const m = Math.floor(s / 60);
       const ss = s % 60;
       return `00 : ${m.toString().padStart(2,'0')} : ${ss.toString().padStart(2,'0')}`;
     };
-    const progressBar = c => {
-      const bar = document.createElement('div'); bar.className = 'progress-bar';
+
+    const progressBar = (c) => {
+      const bar = document.createElement('div');
+      bar.className = 'progress-bar';
       for (let i = 0; i < 3; i++) {
-        const seg = document.createElement('div'); seg.className = 'progress-segment' + (i < step ? ' filled' : ''); bar.append(seg);
+        const seg = document.createElement('div');
+        seg.className = 'progress-segment' + (i < step ? ' filled' : '');
+        bar.append(seg);
       }
       c.append(bar);
     };
@@ -187,6 +205,7 @@
         const { latitude, longitude } = pos.coords;
         const dx = latitude - hutLat;
         const dy = longitude - hutLng;
+        // تقريب المحسوبة بالدرجات إلى كيلومترات تقريبية
         const dist = Math.sqrt(dx * dx + dy * dy) * 111.32;
         if (dist > hutRadius) return callback('far');
         callback();
@@ -195,70 +214,137 @@
 
     function render() {
       clearAll();
-      const root = document.getElementById('cards'); root.innerHTML = '';
-      const err = document.getElementById('error-msg'); err.style.display = 'none';
+      const root = document.getElementById('cards');
+      root.innerHTML = '';
+      const err = document.getElementById('error-msg');
+      err.style.display = 'none';
+
       if (step > 3) return reset();
-      const card = document.createElement('div'); card.className = 'card'; progressBar(card);
-      const content = document.createElement('div'); content.className = 'card-content' + (step===3?' final':'');
-      if (step===3) {
-        const t1 = document.createElement('h3'); t1.textContent = 'Your Offer Is Ready'; content.append(t1);
-        const t2 = document.createElement('h3'); t2.textContent = "🎉 LET'S GOOO!"; content.append(t2);
-        const d1 = document.createElement('div'); d1.className='description'; d1.textContent='Show this to the cashier before time runs out'; content.append(d1);
-        const st = document.createElement('div'); st.className='status'; content.append(st);
-        card.append(content); root.append(card); requestAnimationFrame(()=>card.classList.add('show'));
+
+      const card = document.createElement('div');
+      card.className = 'card';
+      progressBar(card);
+
+      const content = document.createElement('div');
+      content.className = 'card-content' + (step === 3 ? ' final' : '');
+
+      if (step === 3) {
+        // الشاشة النهائية (الخطوة 4)
+        const t1 = document.createElement('h3');
+        t1.textContent = 'Your Offer Is Ready';
+        content.append(t1);
+        const t2 = document.createElement('h3');
+        t2.textContent = "🎉 LET'S GOOO!";
+        content.append(t2);
+        const d1 = document.createElement('div');
+        d1.className = 'description';
+        d1.textContent = 'Show this to the cashier before time runs out';
+        content.append(d1);
+        const st = document.createElement('div');
+        st.className = 'status';
+        content.append(st);
+
+        card.append(content);
+        root.append(card);
+        requestAnimationFrame(() => card.classList.add('show'));
+
         (function updateFinal() {
-          const r = finalDelay - Math.floor((Date.now()-start)/1000);
-          if (r>0) st.textContent = formatTime(r); else reset();
+          const r = finalDelay - Math.floor((Date.now() - start) / 1000);
+          if (r > 0) st.textContent = formatTime(r);
+          else reset();
         })();
         window.finalTimer = setInterval(() => {
-          const r = finalDelay - Math.floor((Date.now()-start)/1000);
-          if (r>0) st.textContent = formatTime(r); else reset();
-        },1000);
+          const r = finalDelay - Math.floor((Date.now() - start) / 1000);
+          if (r > 0) st.textContent = formatTime(r);
+          else reset();
+        }, 1000);
+
         return;
       }
+
+      // الخطوات 1-3
       const title = document.createElement('h3');
-      title.textContent = step === 0 ? "Welcome, Challenger" : step === 1 ? "Almost There" : "Almost Done";
+      title.textContent = step === 0
+        ? "Welcome, Challenger"
+        : step === 1
+          ? "Almost There"
+          : "Almost Done";
       content.append(title);
-      const elapsed = Math.floor((Date.now()-start)/1000);
-      const desc = document.createElement('div'); desc.className='description';
-      let currentDesc = step===0?'Check-in to unlock level 2 🚀':
-        step===1?(elapsed<delay?'Next challenge loading ⏳':'Just one more push to win 🔥'):
-        (elapsed<delay?'Next challenge loading ⏳':'Your reward is waiting for you 🏆');
-      desc.textContent = currentDesc; content.append(desc);
+
+      const elapsed = Math.floor((Date.now() - start) / 1000);
+      const desc = document.createElement('div');
+      desc.className = 'description';
+      let currentDesc = '';
+      if (step === 0) {
+        currentDesc = 'Check-in to unlock level 2 🚀';
+      } else if (step === 1) {
+        currentDesc = elapsed < delay ? 'Next challenge loading ⏳' : 'Just one more push to win 🔥';
+      } else {
+        currentDesc = elapsed < delay ? 'Next challenge loading ⏳' : 'Your reward is waiting for you 🏆';
+      }
+      desc.textContent = currentDesc;
+      content.append(desc);
+
       let status;
       const btn = document.createElement('button');
       btn.textContent = (step === 0 || step === 1) ? 'Next Mission' : 'Claim Now';
-      btn.disabled=(step>0&&elapsed<delay); content.append(btn);
+      // تعطيل الزر حتى يكمل العدّ التنازلي (في الخطوات 1-2 فقط)
+      btn.disabled = (step > 0 && elapsed < delay);
+      content.append(btn);
 
-      if (step>0 && elapsed<delay) {
-        status = document.createElement('div'); status.className='status'; status.textContent=formatTime(delay-elapsed); content.append(status);
-        window.timer = setInterval(()=>{
-          const r = delay - Math.floor((Date.now()-start)/1000);
-          if (r>0) {
-            status.textContent=formatTime(r);
+      if (step > 0 && elapsed < delay) {
+        status = document.createElement('div');
+        status.className = 'status';
+        status.textContent = formatTime(delay - elapsed);
+        content.append(status);
+        window.timer = setInterval(() => {
+          const r = delay - Math.floor((Date.now() - start) / 1000);
+          if (r > 0) {
+            status.textContent = formatTime(r);
           } else {
-            clearInterval(window.timer); status.remove(); btn.disabled=false;
-            desc.textContent = step===1 ? 'Just one more push to win 🔥' : 'Your reward is waiting for you 🏆';
+            clearInterval(window.timer);
+            status.remove();
+            btn.disabled = false;
+            desc.textContent = step === 1 ? 'Just one more push to win 🔥' : 'Your reward is waiting for you 🏆';
           }
-        },1000);
+        }, 1000);
       }
 
+      // تعديل هنا في الـ click handler
       btn.addEventListener('click', () => {
         const err = document.getElementById('error-msg');
-        err.style.display = 'none';
+        // إذا رسالة الخطأ ظاهرة، نوقف كل شيء ونبقيها ظاهرة
+        if (err.style.display === 'block') {
+          return;
+        }
+        // خلاف ذلك نتحقق من الموقع
         checkProximity(error => {
+          // إذا بُعد المستخدم عن المقهى
           if (error === 'far') {
             err.style.display = 'block';
-          } else if (!error) {
-            err.style.display = 'none';
-            clearAll(); step++; start=Date.now(); save(); render();
           }
+          // إذا داخل النطاق (success callback بدون خطأ)
+          else if (!error) {
+            err.style.display = 'none';
+            clearAll();
+            step++;
+            start = Date.now();
+            save();
+            render();
+          }
+          // إذا المتصفح رفض إعطاء الموقع ("geo") أو لم يدعمه،
+          // فلا نفعل أي شيء (لا نظهر رسالة، ولا نتقدم)
         });
       });
 
-      card.append(content); root.append(card); requestAnimationFrame(()=>card.classList.add('show'));
+      card.append(content);
+      root.append(card);
+      requestAnimationFrame(() => card.classList.add('show'));
     }
-    if (!localStorage.stepStart) save(); render();
+
+    // ملاحظة: عند أول تحميل، نقوم بحفظ قيم البداية إذا لم تكن موجودة
+    if (!localStorage.stepStart) save();
+    render();
   </script>
 </body>
 </html>
