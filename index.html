@@ -143,7 +143,6 @@
       font-size: 14px;
       font-weight: 800;
       display: none;
-      gap: 8px;
     }
   </style>
 </head>
@@ -197,7 +196,7 @@
     function render() {
       clearAll();
       const root = document.getElementById('cards'); root.innerHTML = '';
-      const err = document.getElementById('error-msg'); if (err) err.style.display = 'none'; err.textContent = '';
+      const err = document.getElementById('error-msg'); err.style.display = 'none'; err.textContent = '';
       if (step > 3) return reset();
       const card = document.createElement('div'); card.className = 'card'; progressBar(card);
       const content = document.createElement('div'); content.className = 'card-content' + (step===3?' final':'');
