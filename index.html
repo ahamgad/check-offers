@@ -149,7 +149,7 @@
 </head>
 <body>
   <div style="width: 100%;">
-    <div id="error-msg">You must be at Coffee Hut to proceed</div>
+    <div id="error-msg"></div>
     <div id="cards"></div>
     <div class="terms">
       <div class="terms-content">
@@ -167,7 +167,7 @@
     const delay = 15;
     const finalDelay = 15;
     const hutLat = 30.054164, hutLng = 31.201395;
-    const hutRadius = 0.15; // نصف كيلومتر تقريباً
+    const hutRadius = 0.15; // حوالي 150 متر
     let step = +localStorage.stepIndex || 0;
     let start = +localStorage.stepStart || Date.now();
 
@@ -202,45 +202,70 @@
       container.append(bar);
     };
 
-    // دالة تحقق الموقع مع التعامل مع حالات الرفض والمتصفح غير المدعوم
+    // دالة تحقق من موقع المستخدم مع إعدادات timeout قليلة
     function checkProximity(callback) {
       if (!navigator.geolocation) {
-        // المتصفح لا يدعم الجيو لوكيشن
-        console.log('[DEBUG] Geolocation غير مدعوم');
         return callback('no-geo-support');
       }
 
-      navigator.geolocation.getCurrentPosition(
-        pos => {
-          console.log('[DEBUG] جلبنا الإحداثيات:', pos.coords);
-          const { latitude, longitude } = pos.coords;
-          const dx = latitude - hutLat;
-          const dy = longitude - hutLng;
-          const dist = Math.sqrt(dx * dx + dy * dy) * 111.32;
-          console.log('[DEBUG] المسافة (كم):', dist.toFixed(3));
-          if (dist > hutRadius) {
-            console.log('[DEBUG] الحالة: بعيد عن الكافيه');
-            return callback('far');
-          }
-          console.log('[DEBUG] الحالة: داخل النطاق');
-          return callback('inside');
-        },
-        err => {
-          console.log('[DEBUG] خطأ جلب الموقع، code=', err.code);
-          if (err.code === err.PERMISSION_DENIED) {
-            // رفض المستخدم صلاحية الموقع
+      // نتحقق أولاً من حالة الصلاحية
+      navigator.permissions.query({ name: 'geolocation' })
+        .then(permissionStatus => {
+          if (permissionStatus.state === 'denied') {
             return callback('permission-denied');
           }
-          // أي خطأ آخر (مثل timeout أو unavailable)
-          return callback('location-error');
-        },
-        {
-          // خياريّات لتسريع أو تحسين الطلب، يمكن حذفها أو تعديلها
-          enableHighAccuracy: true,
-          timeout: 10000,       // 10 ثواني كحد أقصى للانتظار
-          maximumAge: 0
-        }
-      );
+          // إذا مرفوض سابقًا، نوقف هنا. إذا حالته prompt أو granted، نستدعي getCurrentPosition
+          navigator.geolocation.getCurrentPosition(
+            pos => {
+              const { latitude, longitude } = pos.coords;
+              const dx = latitude - hutLat;
+              const dy = longitude - hutLng;
+              const dist = Math.sqrt(dx*dx + dy*dy) * 111.32;
+              if (dist > hutRadius) {
+                return callback('far');
+              }
+              return callback('inside');
+            },
+            err => {
+              if (err.code === err.PERMISSION_DENIED) {
+                return callback('permission-denied');
+              }
+              // TIMEOUT أو POSITION_UNAVAILABLE
+              return callback('location-error');
+            },
+            {
+              enableHighAccuracy: false,
+              timeout: 3000,   // مهلة 3 ثواني
+              maximumAge: 0
+            }
+          );
+        })
+        .catch(() => {
+          // إذا فشل Permissions API (نادراً ما يحصل)، نطلب الموقع مباشرة
+          navigator.geolocation.getCurrentPosition(
+            pos => {
+              const { latitude, longitude } = pos.coords;
+              const dx = latitude - hutLat;
+              const dy = longitude - hutLng;
+              const dist = Math.sqrt(dx*dx + dy*dy) * 111.32;
+              if (dist > hutRadius) {
+                return callback('far');
+              }
+              return callback('inside');
+            },
+            err => {
+              if (err.code === err.PERMISSION_DENIED) {
+                return callback('permission-denied');
+              }
+              return callback('location-error');
+            },
+            {
+              enableHighAccuracy: false,
+              timeout: 3000,
+              maximumAge: 0
+            }
+          );
+        });
     }
 
     function render() {
@@ -248,10 +273,9 @@
       const root = document.getElementById('cards');
       root.innerHTML = '';
       const errMsg = document.getElementById('error-msg');
-      // في البداية نخفي الرسالة دائماً
       errMsg.style.display = 'none';
+      errMsg.innerHTML = ''; // نتأكد أن المحتوى فارغ عند كل إعادة رسم
 
-      // إذا تجاوزت الخطوات الحد (3) نعيد تهيئة
       if (step > 3) return reset();
 
       const card = document.createElement('div');
@@ -262,7 +286,7 @@
       content.className = 'card-content' + (step === 3 ? ' final' : '');
 
       if (step === 3) {
-        // الشاشة النهائية: يظهر العنوان والوقت المتبقي
+        // شاشة العرض النهائي
         const h1 = document.createElement('h3');
         h1.textContent = 'Your Offer Is Ready';
         content.append(h1);
@@ -281,7 +305,7 @@
         root.append(card);
         requestAnimationFrame(() => card.classList.add('show'));
 
-        // تبدأ العدّة النهائية
+        // عدّ تنازلي نهائي
         (function updateFinal() {
           const r = finalDelay - Math.floor((Date.now() - start) / 1000);
           if (r > 0) st.textContent = formatTime(r);
@@ -323,7 +347,6 @@
       btn.disabled = (step > 0 && elapsed < delay);
       content.append(btn);
 
-      // إذا كان هناك عد تنازلي (خطوات 1-2)
       if (step > 0 && elapsed < delay) {
         statusDiv = document.createElement('div');
         statusDiv.className = 'status';
@@ -342,28 +365,17 @@
         }, 1000);
       }
 
-      // هنا نربط حدث الضغط على الزر
       btn.addEventListener('click', () => {
-        console.log('[DEBUG] تم الضغط على الزر، حالة الخطوة الآن =', step);
-
-        // 1) إذا كانت رسالة الخطأ ظاهرة، لا نفعل شيء
         if (window.getComputedStyle(errMsg).display === 'block') {
-          console.log('[DEBUG] رسالة الخطأ ظاهرة، لن نعيد الفحص');
-          return;
+          return; // إذا الرسالة بالفعل ظاهرة، لا نعيد الفحص
         }
 
-        // 2) نتحقق من الموقع
         checkProximity(status => {
-          console.log('[DEBUG] حالة التحقّق:', status);
-
           if (status === 'far') {
-            // داخل الجيو لوكيشن، لكن بعيدٌ عن المقهى
-            errMsg.textContent = 'You must be at Coffee Hut to proceed';
+            errMsg.innerHTML = '<i class="fi fi-rr-exclamation"></i> You must be at Coffee Hut to proceed';
             errMsg.style.display = 'block';
-            console.log('[DEBUG] عرضنا رسالة: بعيد عن المقهى');
           }
           else if (status === 'inside') {
-            // المستخدم داخل النطاق، نُخفِي الرسالة وننتقل للخطوة التالية
             errMsg.style.display = 'none';
             clearAll();
             step++;
@@ -372,16 +384,12 @@
             render();
           }
           else if (status === 'permission-denied') {
-            // المستخدم رفض صلاحية الموقع في Chrome
-            errMsg.textContent = 'Please enable location access to continue';
+            errMsg.innerHTML = '<i class="fi fi-rr-access-denied"></i> Please enable location access to continue';
             errMsg.style.display = 'block';
-            console.log('[DEBUG] عرضنا رسالة: تفعيل الموقع');
           }
           else if (status === 'no-geo-support' || status === 'location-error') {
-            // المتصفح لا يدعم الجيو لوكيشن أو خطأ عام في جلب الموقع
-            errMsg.textContent = 'Unable to determine your location';
+            errMsg.innerHTML = '<i class="fi fi-rr-octagon-xmark"></i> Unable to determine your location';
             errMsg.style.display = 'block';
-            console.log('[DEBUG] عرضنا رسالة: لا يمكن تحديد الموقع');
           }
         });
       });
@@ -391,7 +399,7 @@
       requestAnimationFrame(() => card.classList.add('show'));
     }
 
-    // عند أول تحميل، إذا لم توجد قيم محفوظة نُنشئها
+    // إذا لم تكن هناك قيم محفوظة، ننشئها
     if (!localStorage.stepStart) save();
     render();
   </script>
