@@ -14,11 +14,11 @@
       align-items: center;
       justify-content: center;
       font-family: 'Inter', sans-serif;
+      padding: 16px;
     }
     #cards {
       width: 100%;
-      max-width: 400px;
-      padding: 16px;
+      margin: 16px 0;
     }
     .card {
       position: relative;
@@ -26,16 +26,14 @@
       overflow: hidden;
       border: 1px solid #F2F2F2;
       border-radius: 16px;
-      height: 300px;
-      margin-bottom: 16px;
+      min-height: 240px;
       display: flex;
       flex-direction: column;
       padding: 24px;
       opacity: 0;
-      transform: translateX(20px);
-      transition: opacity 0.4s ease, transform 0.4s ease;
+      transition: opacity 0.4s ease;
     }
-    .card.show { opacity: 1; transform: translateX(0); }
+    .card.show { opacity: 1; }
     .card-content {
       flex: 1;
       display: flex;
@@ -66,22 +64,54 @@
       text-transform: uppercase;
       text-align: center;
     }
-    .description, .status {
+    .description {
+      margin-top: 4px;
+      font-size: 14px;
+      color: #554D59;
+      text-align: center;
+    }
+    .status {
       margin-top: 4px;
       font-size: 14px;
       color: #444;
       text-align: center;
+      font-weight: 900;
+    }
+    .terms {
+      width: 100%;
+      font-size: 14px;
+      color: #554D59;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      justify-content: center;
+      gap: 8px;
+      border: 1px solid #F2F2F2;
+      border-radius: 16px;
+      background: #FAFAFA;
+    }
+    .terms-content {
+      gap: 8px;
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      justify-content: center;
+    }
+    .terms-content i {
+      color: #8D7F93;
+      margin-top: 2px;
     }
     button {
-      padding: 8px;
-      margin: 4px 0;
-      background: #fff;
+      padding: 8px 16px;
+      margin: 16px 0 0;
+      background: #FAFAFA;
       color: #AC5FD9;
       border: none;
       border-radius: 8px;
       font-size: 16px;
       font-weight: 800;
-      width: 192px;
+      width: auto;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -90,7 +120,7 @@
       transition: opacity 0.4s ease;
       z-index: 2;
     }
-    button:disabled { 
+    button:disabled {
       color: #EFCFFF;
       cursor: not-allowed;
     }
@@ -103,48 +133,46 @@
     .progress-segment {
       flex: 1;
       height: 8px;
-      background: #FCFCFC;
+      background: #FAFAFA;
       border-radius: 4px;
     }
-    .progress-segment.filled { background: #C9FFE3; }
-    .confetti {
-      position: absolute;
-      width: 8px;
-      height: 8px;
-      border-radius: 50%;
-      opacity: 1;
-      animation: explode 3s ease-out forwards;
-      pointer-events: none;
-      z-index: 1;
-    }
-    @keyframes explode {
-      0% { transform: translate(0, 0) scale(1); opacity: 1; }
-      100% { transform: translate(var(--dx), var(--dy)) scale(0.5); opacity: 0; }
+    .progress-segment.filled { background: #B4F7D4; }
+    #error-msg {
+      text-align: center;
+      color: #D12C2C;
+      font-size: 14px;
+      font-weight: 800;
+      display: none;
     }
   </style>
-<!--   <script async src="https://www.googletagmanager.com/gtag/js?id=G-PDZYFK0P93"></script> -->
-  <script>
-    window.dataLayer = window.dataLayer || [];
-    function gtag(){ dataLayer.push(arguments); }
-    gtag('js', new Date());
-    gtag('config', 'G-PDZYFK0P93');
-  </script>
 </head>
 <body>
-  <div id="cards"></div>
+  <div style="width: 100%;">
+    <div id="error-msg"></div>
+    <div id="cards"></div>
+    <div class="terms">
+      <div class="terms-content"><i class="fi fi-rr-settings"></i>Allow location access when prompted</div>
+      <div class="terms-content"><i class="fi fi-rr-home-location-alt"></i>Be inside the Coffee Hut</div>
+    </div>
+  </div>
   <script>
     const delay = 15;
     const finalDelay = 15;
+    const hutLat = 30.054164, hutLng = 31.201395;
+    const hutRadius = 0.15;
     let step = +localStorage.stepIndex || 0;
     let start = +localStorage.stepStart || Date.now();
     const save = () => { localStorage.stepIndex = step; localStorage.stepStart = start; };
     const clearAll = () => {
       clearInterval(window.timer);
       clearInterval(window.finalTimer);
-      clearInterval(window.confettiInterval);
-      document.querySelectorAll('.confetti').forEach(el => el.remove());
     };
     const reset = () => { clearAll(); step = 0; start = Date.now(); save(); render(); };
+    const formatTime = (s) => {
+      const m = Math.floor(s / 60);
+      const ss = s % 60;
+      return `00 : ${m.toString().padStart(2,'0')} : ${ss.toString().padStart(2,'0')}`;
+    };
     const progressBar = c => {
       const bar = document.createElement('div'); bar.className = 'progress-bar';
       for (let i = 0; i < 3; i++) {
@@ -152,73 +180,82 @@
       }
       c.append(bar);
     };
-    function spawnConfetti(parent, x, y) {
-      for (let i = 0; i < 5; i++) {
-        const dot = document.createElement('div'); dot.className = 'confetti';
-        const angle = Math.random() * 2 * Math.PI;
-        const dist = 60 + Math.random() * 20;
-        dot.style.setProperty('--dx', `${Math.cos(angle)*dist}px`);
-        dot.style.setProperty('--dy', `${Math.sin(angle)*dist}px`);
-        dot.style.left = `${x}px`;
-        dot.style.top = `${y}px`;
-        dot.style.backgroundColor = `hsl(${Math.random()*360},100%,50%)`;
-        parent.append(dot);
-        setTimeout(() => dot.remove(), 3000);
-      }
+
+    function checkProximity(callback) {
+      if (!navigator.geolocation) return callback('geo');
+      navigator.geolocation.getCurrentPosition(pos => {
+        const { latitude, longitude } = pos.coords;
+        const dx = latitude - hutLat;
+        const dy = longitude - hutLng;
+        const dist = Math.sqrt(dx * dx + dy * dy) * 111.32;
+        if (dist > hutRadius) return callback('far');
+        callback();
+      }, err => callback('geo'));
     }
-    function launchConfetti(el) {
-      const cardEl = el.closest('.card');
-      const cardRect = cardEl.getBoundingClientRect();
-      const r = el.getBoundingClientRect();
-      const x = r.left - cardRect.left + r.width/2;
-      const y = r.top - cardRect.top + r.height;
-      window.confettiInterval = setInterval(() => spawnConfetti(cardEl, x, y), 4000);
-    }
+
     function render() {
       clearAll();
       const root = document.getElementById('cards'); root.innerHTML = '';
+      const err = document.getElementById('error-msg'); if (err) err.style.display = 'none';
       if (step > 3) return reset();
       const card = document.createElement('div'); card.className = 'card'; progressBar(card);
       const content = document.createElement('div'); content.className = 'card-content' + (step===3?' final':'');
       if (step===3) {
         const t1 = document.createElement('h3'); t1.textContent = 'Your Offer Is Ready'; content.append(t1);
         const t2 = document.createElement('h3'); t2.textContent = "🎉 LET'S GOOO!"; content.append(t2);
-        const d1 = document.createElement('div'); d1.className='description'; d1.textContent='Show the crew this screen before'; content.append(d1);
+        const d1 = document.createElement('div'); d1.className='description'; d1.textContent='Show this to the cashier before time runs out'; content.append(d1);
         const st = document.createElement('div'); st.className='status'; content.append(st);
         card.append(content); root.append(card); requestAnimationFrame(()=>card.classList.add('show'));
-        launchConfetti(t2);
         (function updateFinal() {
           const r = finalDelay - Math.floor((Date.now()-start)/1000);
-          if (r>0) st.textContent = `🎉 0 H - 0 M - ${r} S`; else reset();
+          if (r>0) st.textContent = formatTime(r); else reset();
         })();
         window.finalTimer = setInterval(() => {
           const r = finalDelay - Math.floor((Date.now()-start)/1000);
-          if (r>0) st.textContent = `🎉 0 H - 0 M - ${r} S`; else reset();
+          if (r>0) st.textContent = formatTime(r); else reset();
         },1000);
         return;
       }
-      const title = document.createElement('h3'); title.textContent = `Visit ${step+1}`; content.append(title);
+      const title = document.createElement('h3');
+      title.textContent = step === 0 ? "Welcome, Challenger" : step === 1 ? "Almost There" : "Almost Done";
+      content.append(title);
       const elapsed = Math.floor((Date.now()-start)/1000);
       const desc = document.createElement('div'); desc.className='description';
-      desc.textContent = step===0?'Check in for your first visit.':
-        step===1?(elapsed<delay?'You can check in again after':'Check in for your second visit.'):
-        (elapsed<delay?'You can claim your offer in':'Check in to claim your offer.'); content.append(desc);
+      let currentDesc = step===0?'Check-in to unlock level 2 🚀':
+        step===1?(elapsed<delay?'Next challenge loading ⏳':'Just one more push to win 🔥'):
+        (elapsed<delay?'Next challenge loading ⏳':'Your reward is waiting for you 🏆');
+      desc.textContent = currentDesc; content.append(desc);
       let status;
+      const btn = document.createElement('button');
+      btn.textContent = (step === 0 || step === 1) ? 'Next Mission' : 'Claim Now';
+      btn.disabled=(step>0&&elapsed<delay); content.append(btn);
+
       if (step>0 && elapsed<delay) {
-        status = document.createElement('div'); status.className='status'; status.textContent=`⏳ 0 H - 0 M - ${delay-elapsed} S`; content.append(status);
-      }
-      const btn = document.createElement('button'); btn.textContent='Check In'; btn.disabled=(step>0&&elapsed<delay); content.append(btn);
-      btn.addEventListener('click',()=>{
-        gtag('event', `Visit-${step+1}-Click`);
-        clearAll(); step++; start=Date.now(); save(); render();
-      });
-      if (step>0 && elapsed<delay) {
+        status = document.createElement('div'); status.className='status'; status.textContent=formatTime(delay-elapsed); content.append(status);
         window.timer = setInterval(()=>{
           const r = delay - Math.floor((Date.now()-start)/1000);
-          if (r>0) status.textContent=`⏳ 0 H - 0 M - ${r} S`;
-          else { clearInterval(window.timer); status.remove(); btn.disabled=false; }
+          if (r>0) {
+            status.textContent=formatTime(r);
+          } else {
+            clearInterval(window.timer); status.remove(); btn.disabled=false;
+            desc.textContent = step===1 ? 'Just one more push to win 🔥' : 'Your reward is waiting for you 🏆';
+          }
         },1000);
       }
+
+      btn.addEventListener('click',()=>{
+        checkProximity(error => {
+          const err = document.getElementById('error-msg');
+          if (error === 'far') {
+            err.textContent = 'You must be at Coffee Hut to proceed';
+            err.style.display = 'block';
+          } else if (!error) {
+            err.style.display = 'none';
+            clearAll(); step++; start=Date.now(); save(); render();
+          }
+        });
+      });
+
       card.append(content); root.append(card); requestAnimationFrame(()=>card.classList.add('show'));
     }
     if (!localStorage.stepStart) save(); render();
