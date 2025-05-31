@@ -250,7 +250,7 @@
         err.textContent = '';
         checkProximity(error => {
           if (error === 'far') {
-            err.textContent = '<i class="fi fi-rr-exclamation"></i>You must be at Coffee Hut to proceed';
+            err.textContent = 'You must be at Coffee Hut to proceed';
             err.style.display = 'block';
           } else if (!error) {
             err.style.display = 'none';
