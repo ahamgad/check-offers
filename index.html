@@ -5,6 +5,16 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap" rel="stylesheet"/>
   <link rel="stylesheet" href="https://cdn-uicons.flaticon.com/uicons-regular-rounded/css/uicons-regular-rounded.css"/>
+
+  <!-- Google Analytics 4 (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-PDZYFK0P93"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){ dataLayer.push(arguments); }
+    gtag('js', new Date());
+    gtag('config', 'G-PDZYFK0P93');
+  </script>
+
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
@@ -167,12 +177,11 @@
     const delay = 15;
     const finalDelay = 15;
 
-    // ======= تم تعديل الإحداثيات هنا =======
+    // تم تعديل الإحداثيات هنا
     const hutLat = 30.10683090182237;
     const hutLng = 31.32688947577044;
-    // =====================================
-
     const hutRadius = 0.15; // حوالي 150 متر
+
     let step = +localStorage.stepIndex || 0;
     let start = +localStorage.stepStart || Date.now();
 
@@ -207,7 +216,7 @@
       container.append(bar);
     };
 
-    // دالة تحقق من موقع المستخدم مع timeout 3 ثواني وخيارات سريعة
+    // دالة تحقق من موقع المستخدم (مع timeout 3 ثوانٍ)
     function checkProximity(callback) {
       if (!navigator.geolocation) {
         return callback('no-geo-support');
@@ -237,13 +246,13 @@
             },
             {
               enableHighAccuracy: false,
-              timeout: 3000,  // مهلة 3 ثوانٍ
+              timeout: 3000,
               maximumAge: 0
             }
           );
         })
         .catch(() => {
-          // إذا أخفق Permissions API، نطلب الموقع مباشرة
+          // في حال فشل Permissions API
           navigator.geolocation.getCurrentPosition(
             pos => {
               const { latitude, longitude } = pos.coords;
@@ -276,7 +285,7 @@
       root.innerHTML = '';
       const errMsg = document.getElementById('error-msg');
       errMsg.style.display = 'none';
-      errMsg.innerHTML = ''; // نظّف المحتوى عند كل إعادة عرض
+      errMsg.innerHTML = '';
 
       if (step > 3) return reset();
 
@@ -343,7 +352,7 @@
       }
       content.append(desc);
 
-      // ======= هنا نضع الكاونتر تحت الوصف مباشرة =======
+      // إضافة العداد (statusDiv) تحت الوصف مباشرة
       let statusDiv;
       if (step > 0 && elapsed < delay) {
         statusDiv = document.createElement('div');
@@ -362,7 +371,7 @@
           }
         }, 1000);
       }
-      // =================================================
+      // ==============================
 
       const btn = document.createElement('button');
       btn.textContent = (step === 0 || step === 1) ? 'Next Mission' : 'Claim Now';
@@ -370,14 +379,22 @@
       content.append(btn);
 
       btn.addEventListener('click', () => {
-        // إذا رسالة الخطأ ظاهرة مسبقًا، لا نعيد الفحص
+        // إرسال حدث GA4 بناءً على رقم الخطوة
+        if (step === 0) {
+          gtag('event', 'Visit-1-Click');
+        } else if (step === 1) {
+          gtag('event', 'Visit-2-Click');
+        } else if (step === 2) {
+          gtag('event', 'Visit-3-Click');
+        }
+
+        // إذا كانت رسالة الخطأ ظاهرة مسبقًا، لا نعيد الفحص
         if (window.getComputedStyle(errMsg).display === 'block') {
           return;
         }
 
         checkProximity(status => {
           if (status === 'far') {
-            // لا نعرض أيقونات هنا بناءً على طلبك
             errMsg.textContent = 'You must be at Coffee Hut to proceed';
             errMsg.style.display = 'block';
           }
@@ -394,7 +411,6 @@
             errMsg.style.display = 'block';
           }
           else if (status === 'no-geo-support' || status === 'location-error') {
-            // إضافة السطر الإضافي مع <br>
             errMsg.innerHTML = 'Unable to determine your location<br>Reload page & try again';
             errMsg.style.display = 'block';
           }
