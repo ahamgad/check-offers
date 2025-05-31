@@ -243,10 +243,10 @@
         },1000);
       }
 
-      btn.addEventListener('click',()=>{
+      btn.addEventListener('click', () => {
         const err = document.getElementById('error-msg');
-        err.style.display = 'none';
         err.textContent = '';
+        err.style.display = 'none';
         checkProximity(error => {
           if (error === 'far') {
             err.textContent = 'You must be at Coffee Hut to proceed';
