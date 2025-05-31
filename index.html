@@ -141,9 +141,14 @@
       text-align: center;
       color: #D12C2C;
       font-size: 14px;
-      font-weight: 800;
+      font-weight: 600;
       display: none;
       margin-bottom: 16px;
+    }
+    #error-msg i {
+      font-weight: 900;
+      font-size: 16px;
+      margin-top: 2px;
     }
   </style>
 </head>
@@ -162,11 +167,11 @@
       </div>
     </div>
   </div>
-
+  
   <script>
     const delay = 15;
     const finalDelay = 15;
-    const hutLat = 30.054164, hutLng = 31.201395;
+    const hutLat = 30.10683090182237, hutLng = 31.32688947577044;
     const hutRadius = 0.15; // حوالي 150 متر
     let step = +localStorage.stepIndex || 0;
     let start = +localStorage.stepStart || Date.now();
@@ -384,11 +389,11 @@
             render();
           }
           else if (status === 'permission-denied') {
-            errMsg.innerHTML = '<i class="fi fi-rr-access-denied"></i> Please enable location access to continue';
+            errMsg.innerHTML = '<i class="fi fi-tr-access-denied"></i> Please enable location access to continue';
             errMsg.style.display = 'block';
           }
           else if (status === 'no-geo-support' || status === 'location-error') {
-            errMsg.innerHTML = '<i class="fi fi-rr-octagon-xmark"></i> Unable to determine your location';
+            errMsg.innerHTML = '<i class="fi fi-tr-octagon-xmark"></i> Unable to determine your location';
             errMsg.style.display = 'block';
           }
         });
