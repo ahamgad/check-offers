@@ -81,7 +81,7 @@
       text-align: center;
     }
     .status {
-      margin-top: 8px; /* مسافة بسيطة عن الوصف */
+      margin-top: 8px;
       font-size: 14px;
       font-weight: 700;
       color: #444;
@@ -174,12 +174,13 @@
   </div>
 
   <script>
-    const delay = 15;
-    const finalDelay = 15;
+    // 24 ساعة بالثواني
+    const delay = 86400;
+    const finalDelay = 86400;
 
-    // تم تعديل الإحداثيات هنا
-    const hutLat = 30.10683090182237;
-    const hutLng = 31.32688947577044;
+    // إحداثيات المقهى الجديدة
+    const hutLat = 30.08857495236398;
+    const hutLng = 31.30392383664461;
     const hutRadius = 0.15; // حوالي 150 متر
 
     let step = +localStorage.stepIndex || 0;
@@ -201,9 +202,10 @@
       render();
     };
     const formatTime = (s) => {
-      const m = Math.floor(s / 60);
+      const h = Math.floor(s / 3600);
+      const m = Math.floor((s % 3600) / 60);
       const ss = s % 60;
-      return `00 : ${m.toString().padStart(2,'0')} : ${ss.toString().padStart(2,'0')}`;
+      return `${h.toString().padStart(2,'0')} : ${m.toString().padStart(2,'0')} : ${ss.toString().padStart(2,'0')}`;
     };
     const progressBar = (container) => {
       const bar = document.createElement('div');
@@ -216,7 +218,7 @@
       container.append(bar);
     };
 
-    // دالة تحقق من موقع المستخدم (مع timeout 3 ثوانٍ)
+    // دالة تحقق من موقع المستخدم (بمهلة 3 ثوانٍ)
     function checkProximity(callback) {
       if (!navigator.geolocation) {
         return callback('no-geo-support');
@@ -252,7 +254,6 @@
           );
         })
         .catch(() => {
-          // في حال فشل Permissions API
           navigator.geolocation.getCurrentPosition(
             pos => {
               const { latitude, longitude } = pos.coords;
