@@ -178,9 +178,11 @@
     const finalDelay = 86400;
 
     // إحداثيات المقهى الجديدة
-    const hutLat = 30.088650123136055;
-    const hutLng = 31.303893009043676;
-    const hutRadius = 0.10; // حوالي 150 متر
+    // const hutLat = 30.088650123136055;
+    // const hutLng = 31.303893009043676;
+    const hutLat = 30.106906907697496;
+    const hutLng = 31.32689772438446;
+    const hutRadius = 0.10; // حوالي 100 متر
 
     let step = +localStorage.stepIndex || 0;
     let start = +localStorage.stepStart || Date.now();
@@ -201,8 +203,10 @@
       render();
     };
     const formatTime = (s) => {
-      const h = Math.floor(s / 3600);
-      const m = Math.floor((s % 3600) / 60);
+      // const h = Math.floor(s / 3600);
+      // const m = Math.floor((s % 3600) / 60);
+      const h = Math.floor(s / 1);
+      const m = Math.floor((s % 1) / 60);
       const ss = s % 60;
       return `${h.toString().padStart(2,'0')} : ${m.toString().padStart(2,'0')} : ${ss.toString().padStart(2,'0')}`;
     };
