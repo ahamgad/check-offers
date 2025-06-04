@@ -186,7 +186,7 @@ footer {
   padding-bottom: 32px;
   display: flex;
   flex-direction: column;
-  juctify-content: center;
+  justify-content: center;
   align-items: center;
   gap: 16px;
   margin-top: 8px;
@@ -197,6 +197,10 @@ footer {
   justify-content: center;
   align-items: center;
   gap: 16px;
+  height: 32px;
+}
+.social-container a {
+  width: 32px;
   height: 32px;
 }
 .copyrights {
