@@ -6,6 +6,7 @@ body {
   align-items: center;
   justify-content: center;
   font-family: 'Inter', sans-serif;
+  padding: 0 16px;
 }
 .main-container {
   display: flex;
@@ -18,7 +19,7 @@ body {
 #cards {
   width: 100%;
 /*   height: calc(100% - 128px); */
-  height: 100%;
+  flex-grow: 1;
 }
 .card {
   position: relative;
@@ -148,7 +149,7 @@ button:disabled {
   display: flex;
   align-items: center;
   justify-content: flex-start;
-  padding: 8px 16px;
+  padding: 8px 0px;
   background: #FCFCFC;
   height: 64px;
   width: 100%;
