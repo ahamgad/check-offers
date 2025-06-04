@@ -1,7 +1,7 @@
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body {
   background: #FCFCFC;
-  height: 100vh;
+  height: 100dvh;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -18,7 +18,6 @@ body {
 }
 #cards {
   width: 100%;
-/*   height: calc(100% - 128px); */
   flex-grow: 1;
 }
 .card {
