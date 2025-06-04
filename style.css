@@ -206,6 +206,7 @@ footer {
 .copyrights {
   font-size: 10px;
   font-weight: 400;
-  color: #554D59;
+/*   text-color: #554D59; */
+  text-color: red;
   text-align: center;
 }
