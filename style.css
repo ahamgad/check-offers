@@ -194,9 +194,10 @@ footer {
 .social-container {
   display: flex;
   flex-direction: row;
-  juctify-content: center;
+  justify-content: center;
   align-items: center;
   gap: 16px;
+  height: 32px;
 }
 .copyrights {
   font-size: 10px;
