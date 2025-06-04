@@ -169,6 +169,18 @@ button:disabled {
   font-size: 14px;
   font-weight: 600;
   margin: 0;
+
+  white-space: nowrap;
+  font-family: "Inter:Semi Bold", sans-serif;
+  word-break: break-word;
+  font-style: normal;
+  text-transform: capitalize;
+  letter-spacing: 0px;
+  text-align: left;
+  line-height: 0;
+
+  -webkit-tap-highlight-color: transparent;
+  -webkit-touch-callout: none;
 }
 .arrow {
   width: 12px;
@@ -201,10 +213,18 @@ footer {
 .social-container a {
   width: 32px;
   height: 32px;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-touch-callout: none;
 }
 .copyrights {
   font-size: 10px;
   font-weight: 400;
   color: #554D59;
   text-align: center;
+
+  font-family: "Inter:Regular", sans-serif;
+  word-break: break-word;
+  font-style: normal;
+  letter-spacing: 0px;
+  line-height: 0;
 }
