@@ -168,7 +168,7 @@ button:disabled {
   height: 33px;
   border: hidden;
   font-size: 14px;
-  font-weight: 600
+  font-weight: 600;
   margin: 0;
 }
 .arrow {
@@ -180,4 +180,27 @@ button:disabled {
   inset: 50% auto auto calc(50% + 0.331978px);
   position: absolute;
   height: 48px;
+}
+footer {
+  width: 100%;
+  padding-bottom: 32px;
+  display: flex;
+  flex-direction: column;
+  juctify-content: center;
+  align-items: center;
+  gap: 16px;
+  margin-top: 8px;
+}
+.social-container {
+  display: flex;
+  flex-direction: row;
+  juctify-content: center;
+  align-items: center;
+  gap: 16px;
+}
+.copyrights {
+  font-size: 10px;
+  font-weight: 400;
+  color: #554D59;
+  text-align: center;
 }
