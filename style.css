@@ -13,6 +13,7 @@ body {
   height: 100%;
   max-width: 600px;
   gap: 16px;
+  flex-direction: column;
 }
 #cards {
   width: 100%;
