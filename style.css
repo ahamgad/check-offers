@@ -251,9 +251,12 @@ footer {
   font-family: "Inter", sans-serif;
   font-optical-sizing: auto;
   font-style: normal;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 12px;
 
   word-break: break-word;
   letter-spacing: 0px;
   line-height: 0;
-  height: 12px;
 }
