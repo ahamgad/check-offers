@@ -190,14 +190,13 @@ button:disabled {
   text-decoration: none;
   padding: 8px;
   gap: 8px;
-  font-weight: 800;
+  font-weight: 700;
   color: #554D59;
   background: #FCFCFC;
   width: 75px;
   height: 33px;
   border: hidden;
   font-size: 14px;
-  font-weight: 600;
   margin: 0;
   font-family: "Inter", sans-serif;
   font-optical-sizing: auto;
