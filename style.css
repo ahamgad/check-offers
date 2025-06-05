@@ -5,7 +5,9 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  font-family: 'Inter', sans-serif;
+  font-family: "Inter", sans-serif;
+  font-optical-sizing: auto;
+  font-style: normal;
   padding: 0 16px;
 }
 .main-container {
@@ -48,6 +50,9 @@ body {
   color: #554D59;
   text-transform: uppercase;
   margin-bottom: 8px;
+  font-family: "Inter", sans-serif;
+  font-optical-sizing: auto;
+  font-style: normal;
 }
 .card-content.final h3:nth-child(2) {
   font-size: 24px;
@@ -55,6 +60,9 @@ body {
   text-transform: uppercase;
   color: #AC5FD9;
   margin-bottom: 8px;
+  font-family: "Inter", sans-serif;
+  font-optical-sizing: auto;
+  font-style: normal;
 }
 .card-content h3 {
   color: #554D59;
@@ -63,12 +71,18 @@ body {
   margin-bottom: 8px;
   text-transform: uppercase;
   text-align: center;
+  font-family: "Inter", sans-serif;
+  font-optical-sizing: auto;
+  font-style: normal;
 }
 .description {
   margin-top: 4px;
   font-size: 16px;
   color: #554D59;
   text-align: center;
+  font-family: "Inter", sans-serif;
+  font-optical-sizing: auto;
+  font-style: normal;
 }
 .status {
   margin-top: 8px;
@@ -76,6 +90,9 @@ body {
   font-weight: 700;
   color: #444;
   text-align: center;
+  font-family: "Inter", sans-serif;
+  font-optical-sizing: auto;
+  font-style: normal;
 }
 .terms {
   width: 100%;
@@ -90,6 +107,9 @@ body {
   border: 1px solid #F2F2F2;
   border-radius: 16px;
   background: #FAFAFA;
+  font-family: "Inter", sans-serif;
+  font-optical-sizing: auto;
+  font-style: normal;
 }
 .terms-content {
   gap: 8px;
@@ -119,6 +139,9 @@ button {
   cursor: pointer;
   transition: opacity 0.4s ease;
   z-index: 2;
+  font-family: "Inter", sans-serif;
+  font-optical-sizing: auto;
+  font-style: normal;
 }
 button:disabled {
   color: #EFCFFF;
@@ -143,6 +166,9 @@ button:disabled {
   font-size: 14px;
   font-weight: 600;
   display: none;
+  font-family: "Inter", sans-serif;
+  font-optical-sizing: auto;
+  font-style: normal;
 }
 .main-header {
   display: flex;
@@ -169,11 +195,12 @@ button:disabled {
   font-size: 14px;
   font-weight: 600;
   margin: 0;
+  font-family: "Inter", sans-serif;
+  font-optical-sizing: auto;
+  font-style: normal;
 
   white-space: nowrap;
-  font-family: "Inter:Semi Bold", sans-serif;
   word-break: break-word;
-  font-style: normal;
   text-transform: capitalize;
   letter-spacing: 0px;
   text-align: left;
@@ -221,10 +248,11 @@ footer {
   font-weight: 400;
   color: #554D59;
   text-align: center;
-
-  font-family: "Inter:Regular", sans-serif;
-  word-break: break-word;
+  font-family: "Inter", sans-serif;
+  font-optical-sizing: auto;
   font-style: normal;
+
+  word-break: break-word;
   letter-spacing: 0px;
   line-height: 0;
 }
